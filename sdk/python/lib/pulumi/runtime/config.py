@@ -15,13 +15,14 @@
 """
 Runtime support for the Pulumi configuration system.  Please use pulumi.Config instead.
 """
+
 from typing import Dict, Any, List, Optional, Set
 
 import json
 import os
 
 # default to an empty map for config.
-CONFIG: Dict[str, Any] = dict()
+CONFIG: Dict[str, Any] = {}
 
 # default to an empty set for config secret keys.
 _SECRET_KEYS: Set[str] = set()
@@ -38,9 +39,7 @@ def set_all_config(config: Dict[str, str], secret_keys: Optional[List[str]] = No
     """
     Overwrites the config map and optional list of secret keys.
     """
-    new_config = {}
-    for key, value in config.items():
-        new_config[key] = value
+    new_config = dict(config)
     global CONFIG
     CONFIG = new_config
 
@@ -56,7 +55,7 @@ def get_config_env() -> Dict[str, Any]:
     if 'PULUMI_CONFIG' in os.environ:
         env_config = os.environ['PULUMI_CONFIG']
         return json.loads(env_config)
-    return dict()
+    return {}
 
 
 def get_config_env_key(k: str) -> str:
@@ -72,7 +71,7 @@ def get_config_env_key(k: str) -> str:
             env_key += c.upper()
         else:
             env_key += '_'
-    return 'PULUMI_CONFIG_%s' % env_key
+    return f'PULUMI_CONFIG_{env_key}'
 
 
 def get_config_secret_keys_env() -> List[str]:
@@ -100,10 +99,7 @@ def get_config(k: str) -> Any:
 
     # If the config hasn't been set, but there is a process-wide PULUMI_CONFIG environment variable, use it.
     env_dict = get_config_env()
-    if env_dict is not None and k in env_dict:
-        return env_dict[k]
-
-    return None
+    return env_dict[k] if env_dict is not None and k in env_dict else None
 
 
 def is_config_secret(k: str) -> bool:

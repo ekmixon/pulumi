@@ -14,9 +14,7 @@ class ComponentFour(ComponentResource):
         # Add an alias that references the old type of this resource...
         aliases = [Alias(type_="my:module:ComponentFour")]
         if opts.aliases is not None:
-            for alias in opts.aliases:
-                aliases.append(alias)
-
+            aliases.extend(iter(opts.aliases))
         # ..and then make the super call with the new type of this resource and the added alias.
         opts_copy = copy.copy(opts)
         opts_copy.aliases = aliases

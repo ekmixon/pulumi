@@ -127,13 +127,13 @@ class MockMonitor:
 
     def __init__(self, mocks: Mocks):
         self.mocks = mocks
-        self.resources = dict()
+        self.resources = {}
 
     def make_urn(self, parent: str, type_: str, name: str) -> str:
         if parent != "":
             qualifiedType = parent.split("::")[2]
             parentType = qualifiedType.split("$").pop()
-            type_ = parentType + "$" + type_
+            type_ = f"{parentType}${type_}"
 
         return "urn:pulumi:" + "::".join([get_stack(), get_project(), type_, name])
 

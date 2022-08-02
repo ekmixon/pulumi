@@ -53,7 +53,7 @@ def info(msg: str, resource: Optional['Resource'] = None, stream_id: Optional[in
     if engine is not None:
         _log(engine, engine_pb2.INFO, msg, resource, stream_id, ephemeral)
     else:
-        print("info: " + msg, file=sys.stderr)
+        print(f"info: {msg}", file=sys.stderr)
 
 
 def warn(msg: str, resource: Optional['Resource'] = None, stream_id: Optional[int] = None, ephemeral: Optional[bool] = None) -> None:
@@ -69,7 +69,7 @@ def warn(msg: str, resource: Optional['Resource'] = None, stream_id: Optional[in
     if engine is not None:
         _log(engine, engine_pb2.WARNING, msg, resource, stream_id, ephemeral)
     else:
-        print("warning: " + msg, file=sys.stderr)
+        print(f"warning: {msg}", file=sys.stderr)
 
 
 def error(msg: str, resource: Optional['Resource'] = None, stream_id: Optional[int] = None, ephemeral: Optional[bool] = None):
@@ -88,7 +88,7 @@ def error(msg: str, resource: Optional['Resource'] = None, stream_id: Optional[i
     if engine is not None:
         _log(engine, engine_pb2.ERROR, msg, resource, stream_id, ephemeral)
     else:
-        print("error: " + msg, file=sys.stderr)
+        print(f"error: {msg}", file=sys.stderr)
 
 
 def _log(engine, severity, message, resource, stream_id, ephemeral):

@@ -64,10 +64,9 @@ class Foo(pulumi.ComponentResource):
             opts.version = _utilities.get_version()
         if opts.id is not None:
             raise ValueError('ComponentResource classes do not support opts.id')
-        else:
-            if __props__ is not None:
-                raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
-            __props__ = FooArgs.__new__(FooArgs)
+        if __props__ is not None:
+            raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
+        __props__ = FooArgs.__new__(FooArgs)
 
         super(Foo, __self__).__init__(
             'example::Foo',
@@ -88,42 +87,33 @@ class Foo(pulumi.ComponentResource):
         def some_value(self) -> str:
             return pulumi.get(self, "some_value")
 
-    def bar(__self__, *,
-            baz_required: pulumi.Input['_nested.BazArgs'],
-            bool_value_required: pulumi.Input[bool],
-            name_required: pulumi.Input['pulumi_random.RandomPet'],
-            string_value_required: pulumi.Input[str],
-            baz: Optional[pulumi.Input['_nested.BazArgs']] = None,
-            baz_plain: Optional['_nested.BazArgs'] = None,
-            bool_value: Optional[pulumi.Input[bool]] = None,
-            bool_value_plain: Optional[bool] = None,
-            name: Optional[pulumi.Input['pulumi_random.RandomPet']] = None,
-            name_plain: Optional['pulumi_random.RandomPet'] = None,
-            string_value: Optional[pulumi.Input[str]] = None,
-            string_value_plain: Optional[str] = None) -> pulumi.Output['Foo.BarResult']:
+    def bar(self, *, baz_required: pulumi.Input['_nested.BazArgs'], bool_value_required: pulumi.Input[bool], name_required: pulumi.Input['pulumi_random.RandomPet'], string_value_required: pulumi.Input[str], baz: Optional[pulumi.Input['_nested.BazArgs']] = None, baz_plain: Optional['_nested.BazArgs'] = None, bool_value: Optional[pulumi.Input[bool]] = None, bool_value_plain: Optional[bool] = None, name: Optional[pulumi.Input['pulumi_random.RandomPet']] = None, name_plain: Optional['pulumi_random.RandomPet'] = None, string_value: Optional[pulumi.Input[str]] = None, string_value_plain: Optional[str] = None) -> pulumi.Output['Foo.BarResult']:
         """
         A description of bar.
         """
-        __args__ = dict()
-        __args__['__self__'] = __self__
-        __args__['bazRequired'] = baz_required
-        __args__['boolValueRequired'] = bool_value_required
-        __args__['nameRequired'] = name_required
-        __args__['stringValueRequired'] = string_value_required
-        __args__['baz'] = baz
-        __args__['bazPlain'] = baz_plain
-        __args__['boolValue'] = bool_value
-        __args__['boolValuePlain'] = bool_value_plain
-        __args__['name'] = name
-        __args__['namePlain'] = name_plain
-        __args__['stringValue'] = string_value
-        __args__['stringValuePlain'] = string_value_plain
-        return pulumi.runtime.call('example::Foo/bar', __args__, res=__self__, typ=Foo.BarResult)
+        __args__ = {
+            '__self__': self,
+            'bazRequired': baz_required,
+            'boolValueRequired': bool_value_required,
+            'nameRequired': name_required,
+            'stringValueRequired': string_value_required,
+            'baz': baz,
+            'bazPlain': baz_plain,
+            'boolValue': bool_value,
+            'boolValuePlain': bool_value_plain,
+            'name': name,
+            'namePlain': name_plain,
+            'stringValue': string_value,
+            'stringValuePlain': string_value_plain,
+        }
 
-    def baz(__self__) -> None:
-        __args__ = dict()
-        __args__['__self__'] = __self__
-        pulumi.runtime.call('example::Foo/baz', __args__, res=__self__)
+        return pulumi.runtime.call(
+            'example::Foo/bar', __args__, res=self, typ=Foo.BarResult
+        )
+
+    def baz(self) -> None:
+        __args__ = {'__self__': self}
+        pulumi.runtime.call('example::Foo/baz', __args__, res=self)
 
     @pulumi.output_type
     class GenerateKubeconfigResult:
@@ -137,13 +127,15 @@ class Foo(pulumi.ComponentResource):
         def kubeconfig(self) -> str:
             return pulumi.get(self, "kubeconfig")
 
-    def generate_kubeconfig(__self__, *,
-                            bool_value: bool) -> pulumi.Output['Foo.GenerateKubeconfigResult']:
+    def generate_kubeconfig(self, *, bool_value: bool) -> pulumi.Output['Foo.GenerateKubeconfigResult']:
         """
         Do something with something else
         """
-        __args__ = dict()
-        __args__['__self__'] = __self__
-        __args__['boolValue'] = bool_value
-        return pulumi.runtime.call('example::Foo/generateKubeconfig', __args__, res=__self__, typ=Foo.GenerateKubeconfigResult)
+        __args__ = {'__self__': self, 'boolValue': bool_value}
+        return pulumi.runtime.call(
+            'example::Foo/generateKubeconfig',
+            __args__,
+            res=self,
+            typ=Foo.GenerateKubeconfigResult,
+        )
 

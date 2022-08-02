@@ -446,10 +446,7 @@ def unwrap_rpc_secret(value: Any) -> Any:
     """
     Given a value, if it is a wrapped secret value, return the underlying, otherwise return the value unmodified.
     """
-    if is_rpc_secret(value):
-        return value["value"]
-
-    return value
+    return value["value"] if is_rpc_secret(value) else value
 
 
 def deserialize_property(value: Any, keep_unknowns: Optional[bool] = None) -> Any:
@@ -633,19 +630,23 @@ def translate_output_properties(output: Any,
 
             # If typ is a dict, get the type for its values, to pass along for each key.
             origin = _types.get_origin(typ)
-            if typ is dict or origin in {dict, Dict, Mapping, abc.Mapping}:
-                args = _types.get_args(typ)
-                if len(args) == 2 and args[0] is str:
-                    get_type = lambda k: args[1]
-                    # If transform_using_type_metadata is True, don't translate its keys because
-                    # it is intended to be a user-defined dict.
-                    if transform_using_type_metadata:
-                        translate = lambda k: k
-            else:
+            if typ is not dict and origin not in {
+                dict,
+                Dict,
+                Mapping,
+                abc.Mapping,
+            }:
                 raise AssertionError((f"Unexpected type; expected a value of type `{typ}`"
                                       f" but got a value of type `{dict}`{_Path.format(path)}:"
                                       f" {output}"))
 
+            args = _types.get_args(typ)
+            if len(args) == 2 and args[0] is str:
+                get_type = lambda k: args[1]
+                # If transform_using_type_metadata is True, don't translate its keys because
+                # it is intended to be a user-defined dict.
+                if transform_using_type_metadata:
+                    translate = lambda k: k
         return {
             translate(k):
                 translate_output_properties(v,
@@ -670,10 +671,7 @@ def translate_output_properties(output: Any,
     if typ and isinstance(output, (int, float, str)) and inspect.isclass(typ) and issubclass(typ, Enum):
         return typ(output)
 
-    if isinstance(output, float) and typ is int:
-        return int(output)
-
-    return output
+    return int(output) if isinstance(output, float) and typ is int else output
 
 
 class _Path:
@@ -713,10 +711,7 @@ class _Path:
         if chain:
             coordinates.append(f'property `{".".join(chain)}`')
 
-        if coordinates:
-            return f' at {", ".join(coordinates)}'
-
-        return ''
+        return f' at {", ".join(coordinates)}' if coordinates else ''
 
 
 def contains_unknowns(val: Any) -> bool:
@@ -724,7 +719,7 @@ def contains_unknowns(val: Any) -> bool:
         if known_types.is_unknown(val):
             return True
 
-        if not any((x is val for x in stack)):
+        if all(x is not val for x in stack):
             stack.append(val)
             if isinstance(val, dict):
                 return any((impl(val[k], stack) for k in val))
@@ -770,9 +765,9 @@ def resolve_outputs(res: 'Resource',
 
         all_properties[translated_key] = translated_value
 
-    translated_deps = {}
-    for key, property_deps in deps.items():
-        translated_deps[translate(key)] = property_deps
+    translated_deps = {
+        translate(key): property_deps for key, property_deps in deps.items()
+    }
 
     if not settings.is_dry_run() or settings.is_legacy_apply_enabled():
         for key, value in list(serialized_props.items()):
@@ -876,7 +871,7 @@ class ResourcePackage(ABC):
         pass
 
 
-_RESOURCE_PACKAGES: Dict[str, List[ResourcePackage]] = dict()
+_RESOURCE_PACKAGES: Dict[str, List[ResourcePackage]] = {}
 
 
 def register_resource_package(pkg: str, package: ResourcePackage):
@@ -895,7 +890,7 @@ def register_resource_package(pkg: str, package: ResourcePackage):
 
 
 def get_resource_package(pkg: str, version: str) -> Optional[ResourcePackage]:
-    ver = None if version == "" else Version.parse(version)
+    ver = Version.parse(version) if version else None
 
     best_package = None
     for package in _RESOURCE_PACKAGES.get(pkg, []):
@@ -917,7 +912,7 @@ class ResourceModule(ABC):
         pass
 
 
-_RESOURCE_MODULES: Dict[str, List[ResourceModule]] = dict()
+_RESOURCE_MODULES: Dict[str, List[ResourceModule]] = {}
 
 
 def _module_key(pkg: str, mod: str) -> str:
@@ -943,7 +938,7 @@ def register_resource_module(pkg: str, mod: str, module: ResourceModule):
 
 def get_resource_module(pkg: str, mod: str, version: str) -> Optional[ResourceModule]:
     key = _module_key(pkg, mod)
-    ver = None if version == "" else Version.parse(version)
+    ver = Version.parse(version) if version else None
 
     best_module = None
     for module in _RESOURCE_MODULES.get(key, []):

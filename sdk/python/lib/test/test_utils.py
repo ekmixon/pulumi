@@ -22,7 +22,7 @@ from pulumi._utils import is_empty_function, lazy_import
 # Function with return value based on input, called in the non_empty function
 # bodies below.
 def compute(val: int) -> str:
-    return f"{val} + {1} = {val + 1}"
+    return f"{val} + 1 = {val + 1}"
 
 class Foo:
     def empty_a(self) -> str:

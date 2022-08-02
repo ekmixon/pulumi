@@ -100,9 +100,10 @@ class LanghostMockResourceMonitor(proto.ResourceMonitorServicer):
         import_ = request.importId
         replace_on_changes = sorted(list(request.replaceOnChanges))
 
-        property_dependencies = {}
-        for key, value in request.propertyDependencies.items():
-            property_dependencies[key] = sorted(list(value.urns))
+        property_dependencies = {
+            key: sorted(list(value.urns))
+            for key, value in request.propertyDependencies.items()
+        }
 
         if type_ != "pulumi:pulumi:Stack":
             outs = self.langhost_test.register_resource(
@@ -141,8 +142,7 @@ class LanghostMockResourceMonitor(proto.ResourceMonitorServicer):
     def RegisterResourceOutputs(self, request, context):
         urn = request.urn
         outs = rpc.deserialize_properties(request.outputs)
-        res = self.registrations.get(urn)
-        if res:
+        if res := self.registrations.get(urn):
             self.langhost_test.register_resource_outputs(
                 context, self.dryrun, urn, res["type"], res["name"], res["props"], outs)
         return empty_pb2.Empty()
@@ -236,10 +236,11 @@ class LanghostTest(unittest.TestCase):
             expected = expected_error or ""
             self.assertEqual(result, expected)
 
-            if expected_stderr_contains:
-                if expected_stderr_contains not in str(stderr):
-                    print("stderr:", str(stderr))
-                    self.fail("expected stderr to contain '" + expected_stderr_contains + "'")
+            if expected_stderr_contains and expected_stderr_contains not in str(
+                stderr
+            ):
+                print("stderr:", stderr)
+                self.fail("expected stderr to contain '" + expected_stderr_contains + "'")
 
             if expected_resource_count is not None:
                 self.assertEqual(expected_resource_count,
@@ -291,7 +292,7 @@ class LanghostTest(unittest.TestCase):
         """
         Makes an URN from a given resource type and name.
         """
-        return "%s::%s" % (type_, name)
+        return f"{type_}::{name}"
 
     def base_path(self):
         """

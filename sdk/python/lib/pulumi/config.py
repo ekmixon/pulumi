@@ -79,10 +79,7 @@ class Config:
         :rtype: Optional[str]
         """
         c = self._get(key)
-        if c is None:
-            return None
-
-        return Output.secret(c)
+        return None if c is None else Output.secret(c)
 
     def _get_bool(self,
                   key: str,
@@ -120,10 +117,7 @@ class Config:
         :raises ConfigTypeError: The configuration value existed but couldn't be coerced to bool.
         """
         v = self._get_bool(key)
-        if v is None:
-            return None
-
-        return Output.secret(v)
+        return None if v is None else Output.secret(v)
 
     def _get_int(self,
                  key: str,
@@ -160,10 +154,7 @@ class Config:
         :raises ConfigTypeError: The configuration value existed but couldn't be coerced to int.
         """
         v = self._get_int(key)
-        if v is None:
-            return None
-
-        return Output.secret(v)
+        return None if v is None else Output.secret(v)
 
     def _get_float(self,
                    key: str,
@@ -200,10 +191,7 @@ class Config:
         :raises ConfigTypeError: The configuration value existed but couldn't be coerced to float.
         """
         v = self._get_float(key)
-        if v is None:
-            return None
-
-        return Output.secret(v)
+        return None if v is None else Output.secret(v)
 
     def _get_object(self,
                     key: str,
@@ -232,9 +220,7 @@ class Config:
         shape of the contents.
         """
         v = self._get_object(key)
-        if v is None:
-            return None
-        return Output.secret(v)
+        return None if v is None else Output.secret(v)
 
     def _require(self, key: str, use: Optional[Callable] = None, instead_of: Optional[Callable] = None) -> str:
         v = self._get(key, use, instead_of)
@@ -390,7 +376,7 @@ class Config:
         :return: The name of the configuration key, prefixed with the bag's name.
         :rtype: str
         """
-        return '%s:%s' % (self.name, key)
+        return f'{self.name}:{key}'
 
 
 class ConfigTypeError(errors.RunError):
@@ -434,5 +420,8 @@ class ConfigMissingError(errors.RunError):
     def __init__(self, key: str) -> None:
         self.key = key
         super().__init__(
-            "Missing required configuration variable '%s'\n" % key +
-            "    please set a value using the command `pulumi config set %s <value>`" % key)
+            (
+                "Missing required configuration variable '%s'\n" % key
+                + f"    please set a value using the command `pulumi config set {key} <value>`"
+            )
+        )

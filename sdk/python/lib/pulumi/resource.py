@@ -580,10 +580,7 @@ def _merge_lists(dest, source):
     if dest is None:
         return source
 
-    if source is None:
-        return dest
-
-    return dest + source
+    return dest if source is None else dest + source
 
 
 # !!! IMPORTANT !!! If you add a new attribute to this type, make sure to verify that merge_options
@@ -736,7 +733,7 @@ class Resource:
         if custom:
             provider = opts.provider
             if provider is None:
-                if not opts.parent is None:
+                if opts.parent is not None:
                     # If no provider was given, but we have a parent, then inherit the
                     # provider from our parent.
                     opts.provider = opts.parent.get_provider(t)
@@ -1019,8 +1016,7 @@ def create_urn(
         else:
             parent_urn = Output.from_input(parent)
 
-        parent_prefix = parent_urn.apply(
-            lambda u: u[0:u.rfind("::")] + "$")
+        parent_prefix = parent_urn.apply(lambda u: u[:u.rfind("::")] + "$")
     else:
         if stack is None:
             stack = get_stack()
@@ -1028,7 +1024,7 @@ def create_urn(
         if project is None:
             project = get_project()
 
-        parent_prefix = Output.from_input("urn:pulumi:" + stack + "::" + project + "::")
+        parent_prefix = Output.from_input(f"urn:pulumi:{stack}::{project}::")
 
     all_args = [parent_prefix, type_, name]
     # invariant http://mypy.readthedocs.io/en/latest/common_issues.html#variance

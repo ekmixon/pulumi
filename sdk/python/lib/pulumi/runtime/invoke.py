@@ -59,10 +59,6 @@ class InvokeResult:
 
     # pylint: disable=using-constant-test
     def __await__(self):
-        # We need __await__ to be an iterator, but we only want it to return one value. As such, we use
-        # `if False: yield` to construct this.
-        if False:
-            yield self.value
         return self.value
 
     __iter__ = __await__
@@ -97,7 +93,10 @@ def invoke(tok: str, props: 'Inputs', opts: Optional[InvokeOptions] = None, typ:
         monitor = get_monitor()
         inputs = await rpc.serialize_properties(props, {})
         version = opts.version or ""
-        accept_resources = not (os.getenv("PULUMI_DISABLE_RESOURCE_REFERENCES", "").upper() in {"TRUE", "1"})
+        accept_resources = os.getenv(
+            "PULUMI_DISABLE_RESOURCE_REFERENCES", ""
+        ).upper() not in {"TRUE", "1"}
+
         log.debug(f"Invoking function prepared: tok={tok}")
         req = provider_pb2.InvokeRequest(
             tok=tok,

@@ -32,7 +32,7 @@ class MyMocks(pulumi.runtime.Mocks):
         elif args.name == "a4":
             assert args.inputs == {"first": 11, "second": "12", "third": "13"}
             assert args.provider.endswith("a4provider_id")
-        return [args.name + '_id', args.inputs]
+        return [f'{args.name}_id', args.inputs]
 
 
 pulumi.runtime.set_mocks(MyMocks())

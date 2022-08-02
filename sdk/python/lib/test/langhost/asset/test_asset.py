@@ -36,7 +36,7 @@ class AssetTest(LanghostTest):
             self.assertIsInstance(_resource["asset"], RemoteAsset)
             self.assertEqual(_resource["asset"].uri, "https://pulumi.com")
         else:
-            self.fail("unexpected resource name: " + name)
+            self.fail(f"unexpected resource name: {name}")
         return {
             "urn": self.make_urn(ty, name),
         }

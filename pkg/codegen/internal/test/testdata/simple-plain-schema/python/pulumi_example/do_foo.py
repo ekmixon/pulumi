@@ -18,8 +18,7 @@ def do_foo(foo: Optional[pulumi.InputType['Foo']] = None,
     """
     Use this data source to access information about an existing resource.
     """
-    __args__ = dict()
-    __args__['foo'] = foo
+    __args__ = {'foo': foo}
     if opts is None:
         opts = pulumi.InvokeOptions()
     if opts.version is None:

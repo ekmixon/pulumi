@@ -27,9 +27,9 @@ eks_route_table = aws.ec2.RouteTable("eksRouteTable",
     })
 # Subnets, one for each AZ in a region
 zones = aws.get_availability_zones()
-vpc_subnet = []
-for range in [{"key": k, "value": v} for [k, v] in enumerate(zones.names)]:
-    vpc_subnet.append(aws.ec2.Subnet(f"vpcSubnet-{range['key']}",
+vpc_subnet = [
+    aws.ec2.Subnet(
+        f"vpcSubnet-{range['key']}",
         assign_ipv6_address_on_creation=False,
         vpc_id=eks_vpc.id,
         map_public_ip_on_launch=True,
@@ -37,12 +37,20 @@ for range in [{"key": k, "value": v} for [k, v] in enumerate(zones.names)]:
         availability_zone=range["value"],
         tags={
             "Name": f"pulumi-sn-{range['value']}",
-        }))
-rta = []
-for range in [{"key": k, "value": v} for [k, v] in enumerate(zones.names)]:
-    rta.append(aws.ec2.RouteTableAssociation(f"rta-{range['key']}",
+        },
+    )
+    for range in [{"key": k, "value": v} for [k, v] in enumerate(zones.names)]
+]
+
+rta = [
+    aws.ec2.RouteTableAssociation(
+        f"rta-{range['key']}",
         route_table_id=eks_route_table.id,
-        subnet_id=vpc_subnet[range["key"]].id))
+        subnet_id=vpc_subnet[range["key"]].id,
+    )
+    for range in [{"key": k, "value": v} for [k, v] in enumerate(zones.names)]
+]
+
 subnet_ids = [__item.id for __item in vpc_subnet]
 eks_security_group = aws.ec2.SecurityGroup("eksSecurityGroup",
     vpc_id=eks_vpc.id,

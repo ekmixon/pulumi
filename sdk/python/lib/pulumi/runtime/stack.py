@@ -30,12 +30,7 @@ if TYPE_CHECKING:
 
 
 def _get_running_tasks() -> List[asyncio.Task]:
-    pending = []
-    for task in _all_tasks():
-        # Don't kill ourselves, that would be silly.
-        if not task == _get_current_task():
-            pending.append(task)
-    return pending
+    return [task for task in _all_tasks() if task != _get_current_task()]
 
 
 async def run_pulumi_func(func: Callable):
@@ -123,11 +118,11 @@ class Stack(ComponentResource):
             raise Exception('Only one root Pulumi Stack may be active at once')
 
         # Now invoke the registration to begin creating this resource.
-        name = '%s-%s' % (get_project(), get_stack())
+        name = f'{get_project()}-{get_stack()}'
         super().__init__('pulumi:pulumi:Stack', name, None, None)
 
         # Invoke the function while this stack is active and then register its outputs.
-        self.outputs = dict()
+        self.outputs = {}
         set_root_resource(self)
         try:
             func()
@@ -163,23 +158,17 @@ def massage(attr: Any, seen: List[Any]):
     if reference_contains(attr, seen):
         # Note: for Resources we hit again, emit their urn so cycles can be easily understood in
         # the popo objects.
-        if isinstance(attr, Resource):
-            return attr.urn
-
-        # otherwise just emit as nothing to stop the looping.
-        return None
-
+        return attr.urn if isinstance(attr, Resource) else None
     seen.append(attr)
 
     # first check if the value is an actual dictionary.  If so, massage the values of it to deeply
     # make sure this is a popo.
     if isinstance(attr, dict):
-        result = {}
-        # Don't use attr.items() here, as it will error in the case of outputs with an `items` property.
-        for key in attr:
-            # ignore private keys
-            if not key.startswith("_"):
-                result[key] = massage(attr[key], seen)
+        result = {
+            key: massage(attr[key], seen)
+            for key in attr
+            if not key.startswith("_")
+        }
 
         return result
 
@@ -209,11 +198,7 @@ def massage(attr: Any, seen: List[Any]):
 
 
 def reference_contains(val1: Any, seen: List[Any]) -> bool:
-    for val2 in seen:
-        if val1 is val2:
-            return True
-
-    return False
+    return any(val1 is val2 for val2 in seen)
 
 
 def is_primitive(attr: Any) -> bool:

@@ -31,8 +31,6 @@ class ArgFunctionResult:
 class AwaitableArgFunctionResult(ArgFunctionResult):
     # pylint: disable=using-constant-test
     def __await__(self):
-        if False:
-            yield self
         return ArgFunctionResult(
             age=self.age)
 
@@ -42,8 +40,7 @@ def arg_function(name: Optional['pulumi_random.RandomPet'] = None,
     """
     Use this data source to access information about an existing resource.
     """
-    __args__ = dict()
-    __args__['name'] = name
+    __args__ = {'name': name}
     if opts is None:
         opts = pulumi.InvokeOptions()
     if opts.version is None:

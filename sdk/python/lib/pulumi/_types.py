@@ -528,9 +528,11 @@ def output_type(cls: Type[T]) -> Type[T]:
 def output_type_from_dict(cls: Type[T], output: Dict[str, Any]) -> T:
     assert isinstance(output, dict)
     assert is_output_type(cls)
-    args = {}
-    for python_name, pulumi_name, _ in _py_properties(cls):
-        args[python_name] = output.get(pulumi_name)
+    args = {
+        python_name: output.get(pulumi_name)
+        for python_name, pulumi_name, _ in _py_properties(cls)
+    }
+
     return cls(**args)  # type: ignore
 
 
@@ -556,12 +558,7 @@ def getter(_fn=None, *, name: Optional[str] = None):
         return fn
 
     # See if we're being called as @getter or @getter().
-    if _fn is None:
-        # We're called with parens.
-        return decorator
-
-    # We're called as @getter without parens.
-    return decorator(_fn)
+    return decorator if _fn is None else decorator(_fn)
 
 
 def _translate_name(obj: Any, name: str) -> str:
@@ -642,19 +639,13 @@ if sys.version_info[:2] >= (3, 8):
     get_args = typing.get_args  # type: ignore
 elif sys.version_info[:2] >= (3, 7):
     def get_origin(tp):
-        if isinstance(tp, typing._GenericAlias):  # type: ignore
-            return tp.__origin__
-        return None
+        return tp.__origin__ if isinstance(tp, typing._GenericAlias) else None
 
     def get_args(tp):
-        if isinstance(tp, typing._GenericAlias):  # type: ignore
-            return tp.__args__
-        return ()
+        return tp.__args__ if isinstance(tp, typing._GenericAlias) else ()
 else:
     def get_origin(tp):
-        if hasattr(tp, "__origin__"):
-            return tp.__origin__
-        return None
+        return tp.__origin__ if hasattr(tp, "__origin__") else None
 
     def get_args(tp):
         # Emulate the behavior of get_args for Union on Python 3.6.
@@ -662,11 +653,13 @@ else:
             tree = tp._subs_tree()
             if isinstance(tree, tuple) and len(tree) > 1:
                 def _eval(args):
-                    return tuple(arg if not isinstance(arg, tuple) else arg[0][_eval(arg[1:])] for arg in args)
+                    return tuple(
+                        arg[0][_eval(arg[1:])] if isinstance(arg, tuple) else arg
+                        for arg in args
+                    )
+
                 return _eval(tree[1:])
-        if hasattr(tp, "__args__"):
-            return tp.__args__
-        return ()
+        return tp.__args__ if hasattr(tp, "__args__") else ()
 
 
 def _is_union_type(tp):
@@ -970,36 +963,23 @@ def _create_fn(name, args, body, *, globals=None, locals=None):
 
 
 def _property_init(python_name: str, prop: _Property, globals, is_dict: bool, has_translate: bool):
-    # Return the text of the line in the body of __init__() that will
-    # initialize this property.
+    if prop.default is not MISSING:
+        # Return the text of the line in the body of __init__() that will
+        # initialize this property.
 
-    default_name = f"_dflt_{python_name}"
-    if prop.default is MISSING:
-        # There's no default, just do an assignment.
-        value = python_name
-    else:
+        default_name = f"_dflt_{python_name}"
         globals[default_name] = python_name
-        value = python_name
-
+    # There's no default, just do an assignment.
+    value = python_name
     # Now, actually generate the assignment.
-    if is_dict:
-        # It's a dict, store the value in itself.
-        container = ""
-    else:
-        # It isn't a dict, store the value in __dict__.
-        container = ".__dict__"
-
+    container = "" if is_dict else ".__dict__"
     # Only assign the value if not None.
-    if prop.default is None:
-        check = f"if {value} is not None:\n    "
-    else:
-        check = ""
-
+    check = f"if {value} is not None:\n    " if prop.default is None else ""
     # If it has a _translate_property method, use it to translate the name.
     if has_translate:
         return f"{check}__self__{container}[__self__.{_TRANSLATE_PROPERTY}('{prop.name}')]={value}"
 
-    return f"{check}__self__{container}['{python_name}']={value}"
+    return f"{check}__self__{container}['{value}']={value}"
 
 
 def _init_param(python_name: str, prop: _Property):
@@ -1007,12 +987,7 @@ def _init_param(python_name: str, prop: _Property):
     # example, the equivalent of 'x:int=3' (except instead of 'int',
     # reference a variable set to int, and instead of '3', reference a
     # variable set to 3).
-    if prop.default is MISSING:
-        # There's no default, just output the variable name and type.
-        default = ""
-    else:
-        # There's a default, this will be the name that's used to look it up.
-        default = f"=_dflt_{python_name}"
+    default = "" if prop.default is MISSING else f"=_dflt_{python_name}"
     return f"{python_name}:_type_{python_name}{default}"
 
 
@@ -1031,9 +1006,7 @@ def _init_fn(props: Dict[str, _Property], globals, is_dict: bool, has_translate:
                             "follows default argument")
 
     locals = {f"_type_{python_name}": prop.type for python_name, prop in props.items()}
-    locals.update({
-        "MISSING": MISSING,
-    })
+    locals["MISSING"] = MISSING
 
     body_lines = []
     for python_name, prop in props.items():
@@ -1046,7 +1019,7 @@ def _init_fn(props: Dict[str, _Property], globals, is_dict: bool, has_translate:
 
     first_args = ["__self__"]
     # If we have args after __self__, use bare * to force them to be specified by name.
-    if len(props) > 0:
+    if props:
         first_args += ["*"]
 
     return _create_fn("__init__",

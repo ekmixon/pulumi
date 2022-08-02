@@ -45,8 +45,11 @@ class MyMocks(pulumi.runtime.Mocks):
         if args.typ == 'aws:ec2/securityGroup:SecurityGroup':
             state = {
                 'arn': 'arn:aws:ec2:us-west-2:123456789012:security-group/sg-12345678',
-                'name': args.inputs['name'] if 'name' in args.inputs else args.name + '-sg',
+                'name': args.inputs['name']
+                if 'name' in args.inputs
+                else f'{args.name}-sg',
             }
+
             return ['sg-12345678', dict(args.inputs, **state)]
         elif args.typ == 'aws:ec2/instance:Instance':
             state = {
@@ -59,7 +62,7 @@ class MyMocks(pulumi.runtime.Mocks):
             }
             return ['i-1234567890abcdef0', dict(args.inputs, **state)]
         elif args.typ == 'pkg:index:MyCustom':
-            return [args.name + '_id', args.inputs]
+            return [f'{args.name}_id', args.inputs]
         elif args.typ == 'pulumi:pulumi:StackReference' and 'dns' in args.name:
             return [args.name, {'outputs': {'haha': 'business'}}]
         else:

@@ -15,14 +15,18 @@ class Component1(ComponentResource):
     def __init__(self, name, opts=None):
         super().__init__("my:module:Component", name, None, opts)
         # The resource creation was moved from top level to inside the component.
-        resource = Resource1(name + "-child", ResourceOptions(
-            # With a new parent
-            parent=self,
-            # But with an alias provided based on knowing where the resource existing before - in
-            # this case at top level.  We use an absolute URN instead of a relative `Alias` because
-            # we are referencing a fixed resource that was in some arbitrary other location in the
-            # hierarchy prior to being adopted into this component.
-            aliases=[create_urn("res2", "my:module:Resource")]))
+        resource = Resource1(
+            f"{name}-child",
+            ResourceOptions(
+                # With a new parent
+                parent=self,
+                # But with an alias provided based on knowing where the resource existing before - in
+                # this case at top level.  We use an absolute URN instead of a relative `Alias` because
+                # we are referencing a fixed resource that was in some arbitrary other location in the
+                # hierarchy prior to being adopted into this component.
+                aliases=[create_urn("res2", "my:module:Resource")],
+            ),
+        )
 
 # The creation of the component is unchanged.
 comp2 = Component1("comp2")
@@ -47,9 +51,10 @@ unparented_comp2 = Component2("unparented", ResourceOptions(
 class Component3(ComponentResource):
     def __init__(self, name, opts=ResourceOptions()):
         super().__init__("my:module:Component3", name, None, opts)
-        mycomp2 = Component2(name + "-child", ResourceOptions(
-            aliases=[Alias(parent=opts.parent)],
-            parent=self))
+        mycomp2 = Component2(
+            f"{name}-child",
+            ResourceOptions(aliases=[Alias(parent=opts.parent)], parent=self),
+        )
 
 parented_by_stack_comp3 = Component3("parentedbystack")
 parented_by_component_comp3 = Component3("parentedbycomponent", ResourceOptions(parent=comp2))

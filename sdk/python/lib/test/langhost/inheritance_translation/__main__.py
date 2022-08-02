@@ -54,9 +54,7 @@ class MyResourceSubclassSubclass(MyResourceSubclass):
 class MyLegacyTranslationResource(pulumi.CustomResource):
     def __init__(self, name):
         # Pass a regular dict to use the old translation behavior.
-        props = dict()
-        props["some_value"] = None
-        props["another_value"] = None
+        props = {"some_value": None, "another_value": None}
         super().__init__("test:index:MyResource", name, props)
 
     def translate_output_property(self, prop: str) -> str:

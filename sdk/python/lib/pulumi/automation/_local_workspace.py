@@ -188,8 +188,7 @@ class LocalWorkspace(Workspace):
         self._run_pulumi_cmd_sync(["config", "rm", key, "--stack", stack_name])
 
     def remove_all_config(self, stack_name: str, keys: List[str]) -> None:
-        args = ["config", "rm-all", "--stack", stack_name]
-        args.extend(keys)
+        args = ["config", "rm-all", "--stack", stack_name, *keys]
         self._run_pulumi_cmd_sync(args)
 
     def refresh_config(self, stack_name: str) -> None:
@@ -202,10 +201,7 @@ class LocalWorkspace(Workspace):
 
     def stack(self) -> Optional[StackSummary]:
         stacks = self.list_stacks()
-        for stack in stacks:
-            if stack.current:
-                return stack
-        return None
+        return next((stack for stack in stacks if stack.current), None)
 
     def create_stack(self, stack_name: str) -> None:
         args = ["stack", "init", stack_name]
@@ -301,10 +297,10 @@ class LocalWorkspace(Workspace):
 
 
 def _is_inline_program(**kwargs) -> bool:
-    for key in ["program", "project_name"]:
-        if key not in kwargs or kwargs[key] is None:
-            return False
-    return True
+    return not any(
+        key not in kwargs or kwargs[key] is None
+        for key in ["program", "project_name"]
+    )
 
 
 StackInitializer = Callable[[str, Workspace], Stack]
@@ -434,8 +430,7 @@ def _inline_source_stack_helper(stack_name: str,
     workspace_options.program = program
 
     if not workspace_options.project_settings:
-        work_dir = workspace_options.work_dir
-        if work_dir:
+        if work_dir := workspace_options.work_dir:
             try:
                 _load_project_settings(work_dir)
             except FileNotFoundError:
@@ -468,9 +463,7 @@ def default_project(project_name: str) -> ProjectSettings:
 
 def get_stack_settings_name(name: str) -> str:
     parts = name.split("/")
-    if len(parts) < 1:
-        return name
-    return parts[-1]
+    return parts[-1] if parts else name
 
 
 def _validate_pulumi_version(min_version: VersionInfo, current_version: VersionInfo, opt_out: bool):

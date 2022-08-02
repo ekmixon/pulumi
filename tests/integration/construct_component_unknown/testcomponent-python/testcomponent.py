@@ -40,7 +40,7 @@ class Provider(provider.Provider):
                   options: Optional[ResourceOptions]=None) -> provider.ConstructResult:
 
         if resource_type != 'testcomponent:index:Component':
-            raise Exception('unknown resource type {}'.format(resource_type))
+            raise Exception(f'unknown resource type {resource_type}')
 
         component = Component(name, inputs, options)
 

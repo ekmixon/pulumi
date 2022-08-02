@@ -51,7 +51,7 @@ class DynamicResourceProviderServicer(ResourceProviderServicer):
     def Invoke(self, request, context):
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Invoke is not implemented by the dynamic provider")
-        raise NotImplementedError("unknown function %s" % request.token)
+        raise NotImplementedError(f"unknown function {request.token}")
 
     def Diff(self, request, context):
         olds = rpc.deserialize_properties(request.olds, True)
@@ -62,13 +62,12 @@ class DynamicResourceProviderServicer(ResourceProviderServicer):
             provider = get_provider(news)
         result = provider.diff(request.id, olds, news)  # pylint: disable=no-member
         fields = {}
-        if result.changes is not None:
-            if result.changes:
-                fields["changes"] = proto.DiffResponse.DIFF_SOME # pylint: disable=no-member
-            else:
-                fields["changes"] = proto.DiffResponse.DIFF_NONE # pylint: disable=no-member
-        else:
+        if result.changes is None:
             fields["changes"] = proto.DiffResponse.DIFF_UNKNOWN # pylint: disable=no-member
+        elif result.changes:
+            fields["changes"] = proto.DiffResponse.DIFF_SOME # pylint: disable=no-member
+        else:
+            fields["changes"] = proto.DiffResponse.DIFF_NONE # pylint: disable=no-member
         if result.replaces is not None:
             fields["replaces"] = result.replaces
         if result.delete_before_replace is not None:
@@ -81,9 +80,7 @@ class DynamicResourceProviderServicer(ResourceProviderServicer):
         provider = get_provider(news)
 
         result = provider.update(request.id, olds, news)  # pylint: disable=no-member
-        outs = {}
-        if result.outs is not None:
-            outs = result.outs
+        outs = result.outs if result.outs is not None else {}
         outs[PROVIDER_KEY] = news[PROVIDER_KEY]
 
         loop = asyncio.new_event_loop()

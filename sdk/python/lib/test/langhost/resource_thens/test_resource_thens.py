@@ -64,10 +64,7 @@ class ResourceThensTest(LanghostTest):
                     "other_id": "resourceA",
                 })
 
-            res_id = ""
-            if not _dry_run:
-                res_id = name
-
+            res_id = "" if _dry_run else name
             return {
                 "urn": self.make_urn(ty, name),
                 "id": res_id,

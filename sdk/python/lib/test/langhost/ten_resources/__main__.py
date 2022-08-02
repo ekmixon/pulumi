@@ -20,4 +20,4 @@ class MyResource(CustomResource):
 
 
 for i in range(10):
-    MyResource("testResource" + str(i))
+    MyResource(f"testResource{str(i)}")

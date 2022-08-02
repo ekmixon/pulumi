@@ -43,9 +43,7 @@ def _run_pulumi_cmd(args: List[str],
     # This causes commands to fail rather than prompting for input (and thus hanging indefinitely).
     args.append("--non-interactive")
     env = {**os.environ, **additional_env}
-    cmd = ["pulumi"]
-    cmd.extend(args)
-
+    cmd = ["pulumi", *args]
     stdout_chunks: List[str] = []
 
     with tempfile.TemporaryFile() as stderr_file:

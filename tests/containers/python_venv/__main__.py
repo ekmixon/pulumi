@@ -1,4 +1,4 @@
 import pulumi
 
 config = pulumi.Config()
-print("Hello from %s" % (config.require("runtime")))
+print(f'Hello from {config.require("runtime")}')

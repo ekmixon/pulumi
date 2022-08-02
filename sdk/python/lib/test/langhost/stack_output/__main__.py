@@ -18,8 +18,7 @@ class TestClass:
         self.num = 1
         self._private = 2
 
-recursive = {"a": 1}
-recursive["b"] = 2
+recursive = {"a": 1, "b": 2}
 recursive["c"] = recursive
 
 pulumi.export("string", "pulumi")
@@ -29,7 +28,7 @@ pulumi.export("list", [])
 pulumi.export("list_with_none", [None])
 pulumi.export("list_of_lists", [[], []])
 pulumi.export("list_of_outputs", [[pulumi.Output.from_input(1)], pulumi.Output.from_input([2])])
-pulumi.export("set", set(["val"]))
+pulumi.export("set", {"val"})
 pulumi.export("dict", {"a": 1})
 pulumi.export("output", pulumi.Output.from_input(1))
 pulumi.export("class", TestClass())

@@ -35,10 +35,7 @@ class ConfigMap(dict):
 class Object(dict):
     @staticmethod
     def __key_warning(key: str):
-        suggest = None
-        if key == "stillOthers":
-            suggest = "still_others"
-
+        suggest = "still_others" if key == "stillOthers" else None
         if suggest:
             pulumi.log.warn(f"Key '{key}' not found in Object. Access the value via the '{suggest}' property getter instead.")
 

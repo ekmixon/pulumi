@@ -6,5 +6,5 @@ import pulumi
 
 class Component(pulumi.ComponentResource):
     def __init__(self, name: str, opts: Optional[pulumi.ResourceOptions] = None):
-        props = dict()
+        props = {}
         super().__init__("testcomponent:index:Component", name, props, opts, True)

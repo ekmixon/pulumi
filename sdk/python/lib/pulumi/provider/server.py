@@ -105,11 +105,12 @@ class ProviderServicer(ResourceProviderServicer):
     async def _construct_inputs(request: proto.ConstructRequest) -> Dict[str, pulumi.Input[Any]]:
 
         def deps(key: str) -> Set[str]:
-            return set(urn for urn in
-                       request.inputDependencies.get(
-                           key,
-                           proto.ConstructRequest.PropertyDependencies()
-                       ).urns)
+            return set(
+                request.inputDependencies.get(
+                    key, proto.ConstructRequest.PropertyDependencies()
+                ).urns
+            )
+
 
         return {
             k: await ProviderServicer._create_output(the_input, deps=deps(k))
@@ -123,7 +124,11 @@ class ProviderServicer(ResourceProviderServicer):
 
         # If it's a resource reference or a prompt value, return it directly without wrapping
         # it as an output.
-        if await _is_resource_reference(the_input, deps) or (not is_secret and len(deps) == 0):
+        if (
+            await _is_resource_reference(the_input, deps)
+            or not is_secret
+            and not deps
+        ):
             return the_input
 
         # Otherwise, wrap it as an output so we can handle secrets
@@ -131,16 +136,20 @@ class ProviderServicer(ResourceProviderServicer):
         # Note: If the value is or contains an unknown value, the Output will mark its value as
         # unknown automatically, so we just pass true for is_known here.
         return pulumi.Output(
-            resources=set(DependencyResource(urn) for urn in deps),
+            resources={DependencyResource(urn) for urn in deps},
             future=_as_future(rpc.unwrap_rpc_secret(the_input)),
             is_known=_as_future(True),
-            is_secret=_as_future(is_secret))
+            is_secret=_as_future(is_secret),
+        )
 
     @staticmethod
     def _construct_options(request: proto.ConstructRequest) -> pulumi.ResourceOptions:
-        parent = None
-        if not _empty_as_none(request.parent):
-            parent = DependencyResource(request.parent)
+        parent = (
+            None
+            if _empty_as_none(request.parent)
+            else DependencyResource(request.parent)
+        )
+
         return pulumi.ResourceOptions(
             aliases=list(request.aliases),
             depends_on=[DependencyResource(urn)
@@ -213,11 +222,12 @@ class ProviderServicer(ResourceProviderServicer):
     async def _call_args(request: proto.CallRequest) -> Dict[str, pulumi.Input[Any]]:
 
         def deps(key: str) -> Set[str]:
-            return set(urn for urn in
-                       request.argDependencies.get(
-                           key,
-                           proto.CallRequest.ArgumentDependencies()
-                       ).urns)
+            return set(
+                request.argDependencies.get(
+                    key, proto.CallRequest.ArgumentDependencies()
+                ).urns
+            )
+
 
         return {
             k: await ProviderServicer._create_output(the_input, deps=deps(k))
@@ -257,7 +267,7 @@ class ProviderServicer(ResourceProviderServicer):
     async def GetSchema(self, request: proto.GetSchemaRequest, context) -> proto.GetSchemaResponse:  # pylint: disable=invalid-overridden-method
         if request.version != 0:
             raise Exception(f'unsupported schema version {request.version}')
-        schema = self.provider.schema if self.provider.schema else '{}'
+        schema = self.provider.schema or '{}'
         return proto.GetSchemaResponse(schema=schema)
 
     def __init__(self, provider: Provider, args: List[str], engine_address: str) -> None:
@@ -315,7 +325,7 @@ def _as_future(value: T) -> 'asyncio.Future[T]':
 
 
 def _empty_as_none(text: str) -> Optional[str]:
-    return None if text == '' else text
+    return text or None
 
 
 def _zero_as_none(value: int) -> Optional[int]:

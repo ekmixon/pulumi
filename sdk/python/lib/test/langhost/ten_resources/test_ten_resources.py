@@ -31,6 +31,8 @@ class TenResourcesTest(LanghostTest):
         if not _dry_run:
             self.assertIsNone(
                 self.seen.get(name),
-                "Got multiple resources with the same name: " + name)
+                f"Got multiple resources with the same name: {name}",
+            )
+
             self.seen[name] = True
         return {"urn": self.make_urn(ty, name)}

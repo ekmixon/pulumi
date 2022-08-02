@@ -63,10 +63,7 @@ class TranslatedResource(CustomResource):
         if prop == "recursive_output":
             return "recursiveOutput"
 
-        if prop == "engine_output_prop":
-            return "engineOutputProp"
-
-        return prop
+        return "engineOutputProp" if prop == "engine_output_prop" else prop
 
     def translate_output_property(self, prop: str) -> str:
         if prop == "engineProp":
@@ -82,10 +79,7 @@ class TranslatedResource(CustomResource):
             return "recursive_output"
 
 
-        if prop == "engineOutputProp":
-            return "engine_output_prop"
-
-        return prop
+        return "engine_output_prop" if prop == "engineOutputProp" else prop
 
 
 res = TranslatedResource("res", "some string")

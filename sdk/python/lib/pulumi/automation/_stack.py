@@ -546,9 +546,7 @@ class Stack:
         :returns: Optional[UpdateSummary]
         """
         history = self.history(page_size=1)
-        if not history:
-            return None
-        return history[0]
+        return history[0] if history else None
 
     def cancel(self) -> None:
         """

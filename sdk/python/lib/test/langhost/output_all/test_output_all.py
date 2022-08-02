@@ -33,13 +33,7 @@ class OutputAllTest(LanghostTest):
         elif name == "testResource2":
             self.assertEqual(ty, "test:index:MyResource")
             number = 3
-        elif name == "testResource3":
-            self.assertEqual(ty, "test:index:FinalResource")
-            # The source program uses Output.apply to merge outputs from the above two resources.
-            # The 5 is produced by adding 2 and 3 in the source program.
-            self.assertEqual(_resource["number"], 5)
-            number = _resource["number"]
-        elif name == "testResource4":
+        elif name in ["testResource3", "testResource4"]:
             self.assertEqual(ty, "test:index:FinalResource")
             # The source program uses Output.apply to merge outputs from the above two resources.
             # The 5 is produced by adding 2 and 3 in the source program.

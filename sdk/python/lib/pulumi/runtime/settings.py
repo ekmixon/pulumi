@@ -74,15 +74,14 @@ class Settings:
             self.legacy_apply_enabled = os.getenv("PULUMI_ENABLE_LEGACY_APPLY", "false") == "true"
 
         # Actually connect to the monitor/engine over gRPC.
-        if monitor is not None:
-            if isinstance(monitor, str):
-                self.monitor = resource_pb2_grpc.ResourceMonitorStub(
-                    grpc.insecure_channel(monitor, options=_GRPC_CHANNEL_OPTIONS),
-                )
-            else:
-                self.monitor = monitor
-        else:
+        if monitor is None:
             self.monitor = None
+        elif isinstance(monitor, str):
+            self.monitor = resource_pb2_grpc.ResourceMonitorStub(
+                grpc.insecure_channel(monitor, options=_GRPC_CHANNEL_OPTIONS),
+            )
+        else:
+            self.monitor = monitor
         if engine:
             if isinstance(engine, str):
                 self.engine = engine_pb2_grpc.EngineStub(

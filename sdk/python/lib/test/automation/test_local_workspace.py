@@ -64,11 +64,8 @@ def test_path(*paths):
 
 
 def get_test_org():
-    test_org = "pulumi-test"
     env_var = os.getenv("PULUMI_TEST_ORG")
-    if env_var is not None:
-        test_org = env_var
-    return test_org
+    return env_var if env_var is not None else "pulumi-test"
 
 
 def stack_namer(project_name):
@@ -86,17 +83,14 @@ def get_test_suffix() -> int:
 
 
 def found_plugin(plugin_list: List[PluginInfo], name: str, version: str) -> bool:
-    for plugin in plugin_list:
-        if plugin.name == name and plugin.version == version:
-            return True
-    return False
+    return any(
+        plugin.name == name and plugin.version == version
+        for plugin in plugin_list
+    )
 
 
 def get_stack(stack_list: List[StackSummary], name: str) -> Optional[StackSummary]:
-    for stack in stack_list:
-        if stack.name == name:
-            return stack
-    return None
+    return next((stack for stack in stack_list if stack.name == name), None)
 
 
 class TestLocalWorkspace(unittest.TestCase):
@@ -280,7 +274,7 @@ class TestLocalWorkspace(unittest.TestCase):
             "ten": ConfigValue(value="ten"),
         }
         stack.set_all_config(config)
-        stack.remove_all_config([key for key in config])
+        stack.remove_all_config(list(config))
 
         ws.remove_stack(stack_name)
 

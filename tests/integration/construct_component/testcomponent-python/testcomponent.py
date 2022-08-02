@@ -42,7 +42,7 @@ class Component(ComponentResource):
     def __init__(self, name: str, echo: Input[any], secret: Input[str], opts: Optional[ResourceOptions]=None):
         super().__init__('testcomponent:index:Component', name, {}, opts)
         self.echo = pulumi.Output.from_input(echo)
-        resource = Resource('child-{}'.format(name), echo, ResourceOptions(parent=self))
+        resource = Resource(f'child-{name}', echo, ResourceOptions(parent=self))
         self.child_id = resource.id
         self.secret = secret
         self.register_outputs({
@@ -62,14 +62,14 @@ class Provider(provider.Provider):
                   options: Optional[ResourceOptions]=None) -> provider.ConstructResult:
 
         if resource_type != 'testcomponent:index:Component':
-            raise Exception('unknown resource type {}'.format(resource_type))
-        
+            raise Exception(f'unknown resource type {resource_type}')
+                
 
         secret_key = "secret"
         cfg = pulumi.Config()
         full_secret_key = cfg.full_key(secret_key)
         if not config.is_config_secret(full_secret_key):
-            raise Exception('expected config for key to be secret: {}'.format(full_secret_key))
+            raise Exception(f'expected config for key to be secret: {full_secret_key}')
         secret = cfg.require_secret('secret')
         component = Component(name, inputs['echo'], secret, options)
 

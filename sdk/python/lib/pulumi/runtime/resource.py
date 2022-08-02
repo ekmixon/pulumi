@@ -150,7 +150,7 @@ async def prepare_resource(res: 'Resource',
     aliases: List[Optional[str]] = []
     for alias in res._aliases:
         alias_val = await Output.from_input(alias).future()
-        if not alias_val in aliases:
+        if alias_val not in aliases:
             aliases.append(alias_val)
 
     return ResourceResolverOperations(
@@ -352,7 +352,10 @@ def read_resource(res: 'CustomResource',
             # outputs, record them here.
             additional_secret_outputs = _translate_additional_secret_outputs(res, typ, opts.additional_secret_outputs)
 
-            accept_resources = not (os.getenv("PULUMI_DISABLE_RESOURCE_REFERENCES", "").upper() in {"TRUE", "1"})
+            accept_resources = os.getenv(
+                "PULUMI_DISABLE_RESOURCE_REFERENCES", ""
+            ).upper() not in {"TRUE", "1"}
+
             req = resource_pb2.ReadResourceRequest(
                 type=ty,
                 name=name,
@@ -477,7 +480,10 @@ def register_resource(res: 'Resource',
                 else:
                     raise Exception("Expected custom_timeouts to be a CustomTimeouts object")
 
-            accept_resources = not (os.getenv("PULUMI_DISABLE_RESOURCE_REFERENCES", "").upper() in {"TRUE", "1"})
+            accept_resources = os.getenv(
+                "PULUMI_DISABLE_RESOURCE_REFERENCES", ""
+            ).upper() not in {"TRUE", "1"}
+
             req = resource_pb2.RegisterResourceRequest(
                 type=ty,
                 name=name,
@@ -649,11 +655,8 @@ def convert_providers(
     if providers is None:
         return {}
 
-    if not isinstance(providers, list):
-        return providers
-
-    result = {}
-    for p in providers:
-        result[p.package] = p
-
-    return result
+    return (
+        {p.package: p for p in providers}
+        if isinstance(providers, list)
+        else providers
+    )

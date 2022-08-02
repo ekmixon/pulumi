@@ -29,7 +29,7 @@ unparented_comp2 = Component2("unparented")
 class Component3(ComponentResource):
     def __init__(self, name, opts=None):
         super().__init__("my:module:Component3", name, None, opts)
-        mycomp2 = Component2(name + "-child", opts)
+        mycomp2 = Component2(f"{name}-child", opts)
 
 parented_by_stack_comp3 = Component3("parentedbystack")
 parented_by_component_comp3 = Component3("parentedbycomponent", ResourceOptions(parent=comp2))

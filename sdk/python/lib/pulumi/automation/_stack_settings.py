@@ -68,12 +68,13 @@ class StackSettings:
         if self.encryption_salt:
             serializable["encryptionsalt"] = self.encryption_salt
         if self.config:
-            config = {}
-            for key, val in self.config.items():
-                if isinstance(val, StackSettingsSecureConfigValue):
-                    config[key] = {"secure": val.secure}
-                else:
-                    config[key] = val
+            config = {
+                key: {"secure": val.secure}
+                if isinstance(val, StackSettingsSecureConfigValue)
+                else val
+                for key, val in self.config.items()
+            }
+
             serializable["config"] = config
 
         return serializable

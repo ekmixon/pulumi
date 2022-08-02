@@ -76,12 +76,11 @@ class OtherResource(pulumi.ComponentResource):
             opts.version = _utilities.get_version()
         if opts.id is not None:
             raise ValueError('ComponentResource classes do not support opts.id')
-        else:
-            if __props__ is not None:
-                raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
-            __props__ = OtherResourceArgs.__new__(OtherResourceArgs)
+        if __props__ is not None:
+            raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
+        __props__ = OtherResourceArgs.__new__(OtherResourceArgs)
 
-            __props__.__dict__["foo"] = foo
+        __props__.__dict__["foo"] = foo
         super(OtherResource, __self__).__init__(
             'example::OtherResource',
             resource_name,

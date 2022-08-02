@@ -26,11 +26,11 @@ class Component(pulumi.ComponentResource):
         def message(self) -> str:
             return pulumi.get(self, "message")
 
-    def get_message(__self__, name: pulumi.Input[str]) -> pulumi.Output['Component.GetMessageResult']:
-        __args__ = dict()
-        __args__['__self__'] = __self__
-        __args__['name'] = name
-        return pulumi.runtime.call('testcomponent:index:Component/getMessage',
-                                   __args__,
-                                   res=__self__,
-                                   typ=Component.GetMessageResult)
+    def get_message(self, name: pulumi.Input[str]) -> pulumi.Output['Component.GetMessageResult']:
+        __args__ = {'__self__': self, 'name': name}
+        return pulumi.runtime.call(
+            'testcomponent:index:Component/getMessage',
+            __args__,
+            res=self,
+            typ=Component.GetMessageResult,
+        )

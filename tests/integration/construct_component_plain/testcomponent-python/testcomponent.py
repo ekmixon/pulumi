@@ -41,7 +41,7 @@ class Component(ComponentResource):
     def __init__(self, name: str, children: int, options: Optional[ResourceOptions] = None):
         super().__init__('testcomponent:index:Component', name, {}, options)
 
-        for i in range(0, children):
+        for i in range(children):
             Resource(f'child-{name}-{i+1}', options=ResourceOptions(parent=self))
 
 
@@ -58,7 +58,7 @@ class Provider(provider.Provider):
                   options: Optional[ResourceOptions] = None) -> provider.ConstructResult:
 
         if resource_type != 'testcomponent:index:Component':
-            raise Exception('unknown resource type {}'.format(resource_type))
+            raise Exception(f'unknown resource type {resource_type}')
 
         component = Component(name,
                               children=int(inputs.get('children', 0)),

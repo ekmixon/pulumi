@@ -24,10 +24,11 @@ from pulumi.runtime.settings import _set_project, _set_stack, _set_test_mode_ena
 class FakeResource(CustomResource):
     x: Output[float]
 
-    def __init__(__self__, name, x=None):
-        __props__ = dict()
-        __props__['x'] = x
-        super(FakeResource, __self__).__init__('python:test:FakeResource', name, __props__, None)
+    def __init__(self, name, x=None):
+        __props__ = {'x': x}
+        super(FakeResource, self).__init__(
+            'python:test:FakeResource', name, __props__, None
+        )
 
 
 def async_test(coro):

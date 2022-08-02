@@ -54,7 +54,7 @@ class LanguageServer(LanguageRuntimeServicer):
         )
 
         if request.config:
-            secret_keys = request.configSecretKeys if request.configSecretKeys else None
+            secret_keys = request.configSecretKeys or None
             set_all_config(request.config, secret_keys)
 
         # The strategy here is derived from sdk/python/cmd/pulumi-language-python-exec
@@ -66,7 +66,7 @@ class LanguageServer(LanguageRuntimeServicer):
         except RunError as exn:
             msg = str(exn)
             log.error(msg)
-            result.error = str(msg)
+            result.error = msg
             return result
         except grpc.RpcError as exn:
             # If the monitor is unavailable, it is in the process of shutting down or has already

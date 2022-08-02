@@ -186,26 +186,25 @@ class Component(pulumi.ComponentResource):
             opts.version = _utilities.get_version()
         if opts.id is not None:
             raise ValueError('ComponentResource classes do not support opts.id')
-        else:
-            if __props__ is not None:
-                raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
-            __props__ = ComponentArgs.__new__(ComponentArgs)
+        if __props__ is not None:
+            raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
+        __props__ = ComponentArgs.__new__(ComponentArgs)
 
-            if a is None and not opts.urn:
-                raise TypeError("Missing required property 'a'")
-            __props__.__dict__["a"] = a
-            __props__.__dict__["b"] = b
-            __props__.__dict__["bar"] = bar
-            __props__.__dict__["baz"] = baz
-            if c is None and not opts.urn:
-                raise TypeError("Missing required property 'c'")
-            __props__.__dict__["c"] = c
-            __props__.__dict__["d"] = d
-            if e is None and not opts.urn:
-                raise TypeError("Missing required property 'e'")
-            __props__.__dict__["e"] = e
-            __props__.__dict__["f"] = f
-            __props__.__dict__["foo"] = foo
+        if a is None and not opts.urn:
+            raise TypeError("Missing required property 'a'")
+        __props__.__dict__["a"] = a
+        __props__.__dict__["b"] = b
+        __props__.__dict__["bar"] = bar
+        __props__.__dict__["baz"] = baz
+        if c is None and not opts.urn:
+            raise TypeError("Missing required property 'c'")
+        __props__.__dict__["c"] = c
+        __props__.__dict__["d"] = d
+        if e is None and not opts.urn:
+            raise TypeError("Missing required property 'e'")
+        __props__.__dict__["e"] = e
+        __props__.__dict__["f"] = f
+        __props__.__dict__["foo"] = foo
         super(Component, __self__).__init__(
             'example::Component',
             resource_name,

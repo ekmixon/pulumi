@@ -18,10 +18,7 @@ class Instance(pulumi.CustomResource):
             opts = pulumi.ResourceOptions()
         if name is None and not opts.urn:
             raise TypeError("Missing required property 'name'")
-        __props__: dict = dict()
-        __props__["public_ip"] = None
-        __props__["name"] = name
-        __props__["value"] = value
+        __props__: dict = {"public_ip": None, "name": name, "value": value}
         super(Instance, self).__init__("aws:ec2/instance:Instance", resource_name, __props__, opts)
 
 

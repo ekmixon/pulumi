@@ -9,6 +9,5 @@ class Component(pulumi.ComponentResource):
                  name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  children: Optional[int] = None):
-        props = dict()
-        props["children"] = children
+        props = {"children": children}
         super().__init__("testcomponent:index:Component", name, props, opts, True)
